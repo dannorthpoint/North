@@ -495,13 +495,38 @@ p, .pb-desc, .faq-a p, .cover-stand, .about-body p, .section-head .head-main p {
 /* No wordmark here. The mark is in the nav; this space states the promise.
    The light is the studio's own signature, borrowed from the gallery
    fixtures: one overhead wash falling down the sheet. */
+/* A tint is flat; light has a source, a throw and a shadow. A tight hot core
+   just off the top edge, a long throw down the sheet, and the corners falling
+   away, so the paper reads as lit from above rather than coloured. */
 .cover-wash {
   position: absolute; inset: 0; z-index: 0; pointer-events: none;
   background:
-    radial-gradient(58% 44% at 50% -8%, rgba(var(--lamp), 0.32), transparent 70%),
-    radial-gradient(120% 72% at 50% 0%, rgba(var(--lamp), 0.10), transparent 64%);
+    radial-gradient(30% 26% at 46% -4%, rgba(var(--lamp), 0.52), transparent 68%),
+    radial-gradient(74% 58% at 46% -2%, rgba(var(--lamp), 0.22), transparent 72%),
+    radial-gradient(130% 96% at 46% 4%, rgba(var(--lamp), 0.07), transparent 66%),
+    radial-gradient(118% 84% at 50% 118%, rgba(17, 17, 17, 0.13), transparent 62%);
 }
-.cover-inner { position: relative; z-index: 1; width: 100%; }
+/* the throw picks out the top edge of the sheet the way a raking light does */
+.cover-wash::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--lamp), 0.55) 34%, rgba(var(--lamp), 0.55) 62%, transparent);
+}
+.cover-inner {
+  position: relative; z-index: 1; width: 100%;
+  display: grid; grid-template-columns: 1.14fr 0.86fr;
+  column-gap: clamp(48px, 6vw, 104px); align-items: end;
+}
+.cover-lede { grid-column: 1; min-width: 0; }
+/* the supporting column carries the argument and the actions, so the right
+   half of the frame is doing work instead of sitting empty */
+.cover-aside { grid-column: 2; min-width: 0; padding-bottom: 0.6em; }
+.cover-rule { grid-column: 1 / -1; }
+@media (max-width: 900px) {
+  .cover-inner { grid-template-columns: 1fr; }
+  .cover-lede, .cover-aside, .cover-rule { grid-column: 1; }
+  /* stacked, the supporting copy needs the gap the column gutter was giving it */
+  .cover-aside { padding-bottom: 0; margin-top: clamp(26px, 3.4vh, 40px); }
+}
 
 .cover-eyebrow {
   font-size: 11px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase;
@@ -510,9 +535,9 @@ p, .pb-desc, .faq-a p, .cover-stand, .about-body p, .section-head .head-main p {
 }
 .cover-head {
   font-family: var(--display); font-weight: 300;
-  font-size: clamp(41px, 7.4vw, 112px);
-  line-height: 1.0; letter-spacing: -0.028em; color: var(--ink);
-  max-width: 15ch;
+  font-size: clamp(41px, 6.6vw, 104px);
+  line-height: 0.99; letter-spacing: -0.03em; color: var(--ink);
+  max-width: 11ch;
   font-variation-settings: 'SOFT' 26, 'WONK' 1, 'opsz' 144;
   animation: fadeUp 1s var(--ease) 0.12s both;
 }
@@ -524,7 +549,7 @@ p, .pb-desc, .faq-a p, .cover-stand, .about-body p, .section-head .head-main p {
   line-height: 1.1; padding-bottom: 0.05em;
 }
 .cover-stand {
-  margin-top: clamp(26px, 3.2vh, 40px);
+  margin-top: 0;
   font-size: clamp(16px, 1.2vw, 18px); line-height: 1.75; font-weight: 400;
   color: var(--ink-soft); max-width: 48ch;
   animation: fadeUp 1s var(--ease) 0.2s both;
@@ -692,6 +717,12 @@ nav {
 .nav-strip-wrap .strip-arrow.is-hidden { opacity: 0; }
 @media (max-width: 760px) { .nav-strip-wrap { display: block; } }
 
+/* Three stacked bars before any content is a shelf, not a header. On a phone
+   the locale strip is the one that carries no navigation, so it goes first. */
+@media (max-width: 760px) {
+  .masthead { display: none; }
+}
+
 /* ===== Phone: the bar is a bar, not a shelf =====
    Two stacked rows pinned to the top of a 844px screen is a permanent tax on
    every scroll position. The rows are tightened, and the whole bar tucks away
@@ -700,13 +731,13 @@ nav {
 @media (max-width: 760px) {
   nav { transition: transform 0.34s var(--ease); will-change: transform; }
   nav.is-tucked { transform: translateY(-101%); }
-  .nav-content { height: 54px; padding: 0 20px; }
+  .nav-content { height: 50px; padding: 0 20px; }
   .logo { gap: 11px; }
   .logo .mark { width: 25px; height: 25px; }
   .logo .word .n1 { font-size: 15px; }
   .logo .word .n2 { font-size: 8px; letter-spacing: 0.18em; margin-top: 3px; }
-  .nav-strip { padding: 0 32px 8px; gap: 19px; }
-  .nav-strip a.navlink { font-size: 10px; letter-spacing: 0.17em; padding: 8px 0 2px; }
+  .nav-strip { padding: 0 32px 7px; gap: 19px; }
+  .nav-strip a.navlink { font-size: 10px; letter-spacing: 0.17em; padding: 7px 0 2px; }
   .nav-strip a.navlink-cta { padding: 5px 12px; margin-top: 2px; }
   .nav-strip-wrap .strip-arrow { bottom: 8px; width: 32px; }
 }
@@ -1725,12 +1756,16 @@ footer { background: var(--noir); color: var(--ivory); padding: 0 0 46px; border
   <div class="grain-paper" aria-hidden="true"></div>
   <div class="cover-wash" aria-hidden="true"></div>
   <div class="container cover-inner">
-    <p class="cover-eyebrow">Web Design Studio, Liverpool</p>
-    <h1 class="cover-head">Web design that <em>actually</em> works.</h1>
-    <p class="cover-stand">Custom sites, built by hand, for businesses that mean to be taken seriously. No templates, no compromises. Fixed price, quoted within 24 hours.</p>
-    <div class="cover-actions">
-      <a href="#contact" class="btn-solid">Request a Quote <span class="arrow">&rarr;</span></a>
-      <a href="#work" class="link-underline muted">See the Work <span class="arrow">&rarr;</span></a>
+    <div class="cover-lede">
+      <p class="cover-eyebrow">Web Design Studio, Liverpool</p>
+      <h1 class="cover-head">Web design that <em>actually</em> works.</h1>
+    </div>
+    <div class="cover-aside">
+      <p class="cover-stand">Custom sites, built by hand, for businesses that mean to be taken seriously. No templates, no compromises. Fixed price, quoted within 24 hours.</p>
+      <div class="cover-actions">
+        <a href="#contact" class="btn-solid">Request a Quote <span class="arrow">&rarr;</span></a>
+        <a href="#work" class="link-underline muted">See the Work <span class="arrow">&rarr;</span></a>
+      </div>
     </div>
     <div class="cover-rule" aria-hidden="true"></div>
   </div>
