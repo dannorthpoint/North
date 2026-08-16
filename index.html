@@ -145,8 +145,8 @@
   --champagne: #C5B38F;
   --champagne-hi: #DCD0B6;
   --champagne-soft: rgba(197, 179, 143, 0.55);
-  --brass: #9C8968;
-  --brass-ink: #6B5D45;            /* darker brass for small text on paper: AA safe */
+  --brass: #998665;                /* AA large-text (3:1) against paper */
+  --brass-ink: #6A5C44;            /* darker brass for small text on paper: AA safe */
   --brass-soft: rgba(156, 137, 104, 0.5);
   --hair: rgba(249, 246, 240, 0.14);
   --hair-strong: rgba(249, 246, 240, 0.26);
@@ -188,6 +188,10 @@ html {
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
   width: 100%;
+  /* the scrollbar is part of the sheet, not browser chrome: a brass rule on
+     noir, matching the room the page opens in */
+  scrollbar-width: thin;
+  scrollbar-color: var(--brass) var(--noir);
 }
 
 body {
@@ -216,9 +220,6 @@ img { max-width: 100%; display: block; height: auto; }
 
 ::selection { background: var(--champagne); color: var(--noir); }
 
-/* the scrollbar is part of the sheet, not browser chrome: a brass rule on
-   noir, ink on paper, matching whichever room is currently in view */
-html { scrollbar-width: thin; scrollbar-color: var(--brass) var(--noir); }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--noir); }
 ::-webkit-scrollbar-thumb { background: var(--brass); border: 2px solid var(--noir); background-clip: padding-box; }
@@ -257,10 +258,13 @@ section { scroll-margin-top: 90px; }
 
 /* ============ SCROLL PROGRESS ============ */
 /* a hairline of foil tracking the page, the same instrument a bookbinder marks a folio by */
+/* scaled on the compositor rather than resized: a width transition on every
+   scroll frame relayouts the page under the bar */
 .scroll-progress {
-  position: fixed; top: 0; left: 0; height: 1.5px; width: 0%; z-index: 5000;
+  position: fixed; top: 0; left: 0; height: 1.5px; width: 100%; z-index: 5000;
   background: var(--brass);
-  transition: width 0.12s linear, opacity 0.6s ease;
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform 0.12s linear, opacity 0.6s ease;
   pointer-events: none;
 }
 
@@ -371,9 +375,10 @@ body.loading { overflow: hidden; }
   opacity: 0; animation: fadeIn 0.6s var(--ease) 1.5s forwards;
 }
 .loader-bar span {
-  position: absolute; inset: 0 auto 0 0; width: 0%; overflow: hidden;
+  position: absolute; inset: 0 0 0 0; overflow: hidden;
   background: var(--champagne);
-  transition: width 0.45s var(--ease);
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform 0.45s var(--ease);
 }
 /* the fill is a solid rule travelling a printer's scale: no shimmer, no chase */
 .loader-pct {
@@ -463,12 +468,12 @@ body.loading { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .loader-mark .lm-ring, .loader-mark .lm-f, .loader-word span, .loader-sub,
   .loader-bar, .loader-pct, .loader-coords,
-  .loader-bar span::after, .loader-gate { animation: none !important; transition: none !important; }
+  .loader-gate { animation: none !important; transition: none !important; }
   .loader-mark .lm-ring { stroke-dashoffset: 0; }
   .loader-mark .lm-f { opacity: 1; transform: none; }
   .loader-word span { transform: translateY(0); }
   .loader-sub { opacity: 1; }
-  .lm-comet, .lm-ring-pulse { display: none; }
+  .lm-comet { display: none; }
   .loader.ready .loader-bar { display: none; }
   .loader-gate { opacity: 1; transform: none; visibility: visible; }
 }
@@ -553,17 +558,17 @@ p, .pb-desc, .faq-a p, .cover-stand, .about-body p, .section-head .head-main p {
 }
 
 /* a tracking scale, not one value: small type needs more air between letters
-   than large type, and the same 0.2em on both is why most sites look untuned */
-.masthead-inner, .cover-issue, .rail, .footer-bottom,
-.loader-sub, .loader-coords, .lg-kicker,
-.price-row .pr-price .from, .contact-detail .cd-label,
+   than large type, and the same 0.2em on both is why most sites look untuned.
+   Only the selectors that actually resolve to these values are listed. The
+   controls tier (nav links, buttons, .link-underline, .cta-note, .ai-badge,
+   label) each set their own tracking further down and never reached 0.16em
+   here; .lg-btn is the one that does. */
+.cover-issue, .rail, .loader-sub, .loader-coords, .lg-kicker,
 .footer-brand .fb-sub { letter-spacing: 0.26em; }
 .kicker, .hm-label, .pb-meta, .plaque, .tvideo-by,
 .plate-body .pb-testimonial .pt-by, .statement .by,
 .price-row .pr-desc, .about-portrait .cap { letter-spacing: 0.2em; }
-.nav-links a.navlink, .nav-cta, .nav-strip a.navlink,
-.btn-solid, .lg-btn, .form-submit, .price-row .pr-cta,
-.link-underline, .cta-note, .ai-badge, label { letter-spacing: 0.16em; }
+.lg-btn { letter-spacing: 0.16em; }
 
 /* ============ LAYOUT ============ */
 .container { max-width: 1280px; margin: 0 auto; padding: 0 56px; }
@@ -655,7 +660,6 @@ p, .pb-desc, .faq-a p, .cover-stand, .about-body p, .section-head .head-main p {
   background-repeat: repeat-x; background-size: 900px 26px;
 }
 .torn-from-paper::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='26' viewBox='0 0 900 26' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H900 L900.0 19.0 L899.5 15.1 L886.4 14.9 L870.7 16.5 L857.1 17.1 L844.4 15.9 L838.8 16.9 L835.7 16.9 L829.9 19.3 L815.6 17.6 L806.4 21.8 L800.0 14.6 L790.7 20.8 L783.3 18.0 L779.8 22.2 L770.4 18.7 L763.0 17.6 L754.2 15.9 L744.9 15.9 L728.6 18.7 L713.9 15.2 L706.4 16.4 L691.1 18.5 L682.1 17.8 L674.5 16.7 L662.3 15.3 L656.4 16.0 L653.3 19.1 L641.7 18.0 L635.5 17.5 L632.0 14.9 L617.3 17.4 L604.0 18.1 L588.7 17.7 L584.6 17.4 L576.2 17.4 L561.1 16.6 L545.9 17.9 L538.0 18.5 L525.2 19.0 L511.8 14.9 L494.8 18.2 L485.1 21.8 L472.3 14.6 L468.8 17.4 L456.1 19.4 L440.6 15.2 L429.6 15.4 L425.8 15.8 L422.6 19.1 L415.6 18.8 L404.8 12.4 L399.3 17.5 L384.8 18.0 L378.5 22.4 L369.6 18.9 L353.3 19.2 L339.9 15.7 L325.5 15.3 L319.9 17.4 L310.1 16.8 L301.9 15.7 L290.8 12.2 L283.2 15.8 L277.2 15.0 L265.2 16.5 L259.2 16.0 L245.0 15.8 L239.0 15.1 L227.0 18.2 L221.3 17.3 L215.9 14.8 L211.4 12.4 L194.9 12.6 L181.0 14.9 L172.5 16.8 L156.7 14.5 L141.9 16.4 L127.0 18.3 L123.0 15.6 L115.6 18.7 L98.7 15.9 L89.3 17.0 L77.3 18.7 L68.1 14.7 L61.8 12.3 L58.5 17.6 L46.4 19.4 L42.8 18.5 L38.5 15.0 L24.4 17.1 L18.9 17.0 L9.3 17.3 L0 16.7 Z' fill='%23EFEEE9'/%3E%3C/svg%3E"); }
-.torn-from-noir::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='26' viewBox='0 0 900 26' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H900 L900.0 21.8 L895.3 17.7 L892.2 17.3 L876.3 17.0 L861.3 15.0 L854.5 16.4 L841.4 15.9 L836.4 18.4 L823.8 14.9 L818.6 16.2 L810.2 17.7 L801.7 16.7 L796.8 16.6 L791.1 15.5 L777.7 16.8 L772.6 17.4 L764.4 17.7 L754.6 15.4 L739.2 15.4 L734.9 14.6 L730.7 18.2 L720.8 14.6 L707.4 15.1 L695.4 17.2 L679.0 15.1 L662.5 17.7 L647.7 15.8 L636.0 17.3 L622.0 18.4 L617.4 18.4 L602.5 20.6 L598.0 15.8 L591.3 15.3 L584.1 16.2 L578.0 17.6 L567.6 18.5 L562.0 19.2 L548.6 14.8 L531.7 16.4 L515.2 18.0 L499.1 17.8 L494.2 16.7 L483.6 18.7 L478.8 14.7 L465.5 17.5 L461.6 19.3 L445.9 17.1 L438.0 18.0 L432.1 16.3 L418.4 17.3 L412.5 15.6 L401.1 17.1 L390.0 19.2 L386.7 17.2 L381.4 13.7 L376.6 16.7 L372.5 17.5 L367.7 18.0 L350.8 15.3 L336.4 16.0 L327.2 16.8 L319.9 14.7 L304.9 13.1 L295.4 16.0 L280.5 19.5 L272.7 16.4 L265.1 15.5 L258.9 18.2 L244.1 22.3 L235.3 13.0 L228.2 14.8 L225.1 19.0 L214.3 15.6 L198.7 17.1 L189.2 17.9 L178.4 12.5 L174.6 15.0 L164.7 15.3 L154.5 16.3 L149.0 16.3 L141.1 16.7 L133.8 17.4 L125.9 14.6 L109.3 19.5 L102.6 15.4 L92.2 19.2 L78.7 16.5 L74.3 18.0 L62.2 17.6 L55.7 19.4 L52.5 17.8 L39.2 18.7 L35.1 19.1 L31.1 19.0 L25.5 16.4 L17.8 14.8 L12.1 18.0 L0 17.4 Z' fill='%23111111'/%3E%3C/svg%3E"); }
 .torn-from-noir2::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='26' viewBox='0 0 900 26' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H900 L900.0 16.8 L894.3 17.6 L885.6 16.1 L873.8 17.5 L866.9 17.8 L852.6 18.9 L848.6 15.1 L845.0 15.7 L833.4 19.0 L829.3 13.1 L814.3 17.6 L808.7 19.0 L805.1 12.6 L788.8 17.2 L776.3 15.5 L763.9 18.6 L754.1 13.2 L744.5 16.7 L736.3 18.0 L731.1 18.3 L723.8 15.2 L713.6 18.9 L707.0 19.1 L697.0 19.0 L684.0 19.2 L678.5 18.4 L663.1 20.9 L651.8 19.5 L643.5 15.7 L629.4 16.7 L616.6 16.3 L608.6 15.2 L601.9 16.2 L594.7 16.9 L588.1 18.2 L576.6 15.7 L561.1 18.0 L545.7 20.7 L531.2 19.2 L525.2 17.1 L512.1 18.7 L501.4 19.1 L492.2 16.0 L479.9 17.7 L470.2 15.6 L465.2 13.3 L458.4 15.8 L454.8 18.0 L443.7 15.8 L436.1 14.6 L427.2 17.6 L422.4 14.5 L417.3 15.1 L410.6 19.3 L395.5 17.1 L383.9 21.6 L374.5 19.4 L366.1 15.4 L360.0 17.8 L343.5 18.6 L338.0 16.2 L330.4 17.4 L323.8 17.9 L315.1 15.5 L310.8 16.4 L295.8 18.0 L279.7 18.1 L272.0 19.0 L255.1 15.1 L238.5 22.3 L229.3 13.0 L224.1 13.2 L219.9 19.3 L216.4 19.3 L202.4 12.9 L185.9 15.4 L177.7 14.8 L163.8 15.3 L151.0 16.2 L135.4 17.6 L131.1 19.2 L119.9 13.5 L104.5 18.7 L88.3 20.6 L77.2 17.5 L63.4 17.1 L59.1 18.6 L44.1 16.7 L30.6 18.8 L22.4 21.4 L13.0 17.9 L3.5 18.0 L0 15.6 Z' fill='%231A1A1A'/%3E%3C/svg%3E"); }
 @media (max-width: 640px) {
   .torn::before { height: 17px; background-size: 560px 17px; }
@@ -839,7 +843,6 @@ nav {
     radial-gradient(circle at center bottom, rgba(197, 179, 143, 0.11) 20%, transparent 80%),
     var(--paper);
   color: var(--ink);
-  border-bottom: 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -1039,7 +1042,7 @@ nav {
   transition: background 0.4s var(--ease), color 0.4s var(--ease), border-color 0.4s var(--ease);
 }
 @media (max-width: 900px) { .ai-badge { margin-top: 24px; align-self: center; } }
-.ai-badge .ai-dot { color: var(--brass); opacity: 0.8; }
+.ai-badge .ai-dot { color: var(--brass-ink); }
 .ai-badge:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -1089,7 +1092,6 @@ nav {
 /* ============ HALLMARK STRIP — cut from one sheet ============ */
 .hallmark {
   border-bottom: 1px solid var(--hair);
-  border-top: 0;
   /* the sheet: a ruled ledger that runs continuously beneath every cell */
   background-color: #101010;
   background-image: repeating-linear-gradient(180deg, rgba(249,246,240,0.045) 0 1px, transparent 1px 29px);
@@ -1191,8 +1193,8 @@ nav {
   font-size: clamp(170px, 21vw, 300px); line-height: 1;
   color: rgba(249, 246, 240, 0.05);
   pointer-events: none; user-select: none;
+  right: -8px;
 }
-.plate .ghost { right: -8px; }
 .plate.flip .ghost { right: auto; left: -8px; }
 .plate:nth-child(even) .plaque { transform: rotate(0.35deg); }
 @media (max-width: 860px) { .plate .ghost { display: none; } }
@@ -1358,7 +1360,8 @@ nav {
   transform: rotate(-0.4deg);
   padding: 10px 22px;
   background: linear-gradient(155deg, #C5B38F 0%, #B3A283 50%, #9C8968 100%);
-  color: #2B2721;
+  /* clears AA against the darkest stop of the brass gradient above */
+  color: #28241E;
   font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
   text-align: center; white-space: nowrap;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.22);
@@ -1367,6 +1370,9 @@ nav {
     inset 0 -1px 0 rgba(0, 0, 0, 0.22),
     0 8px 16px -8px rgba(0, 0, 0, 0.8);
   overflow: hidden;
+  /* the plaque lifts with the lamp, same as the art it captions */
+  opacity: calc(0.55 + var(--lit) * 0.45);
+  transition: opacity 0.3s linear;
 }
 .plaque::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -1382,7 +1388,6 @@ nav {
 .plate-body .pb-no {
   font-family: var(--display); font-style: italic; font-size: 15px; color: var(--champagne); margin-bottom: 18px;
 }
-.plaque { opacity: calc(0.55 + var(--lit) * 0.45); transition: opacity 0.3s linear; }
 .plate-body h3 { margin-bottom: 14px; color: var(--ivory); font-size: clamp(26px, 3.2vw, 38px); }
 .plate-body .pb-medium {
   font-family: var(--display); font-style: italic; font-size: 17px; color: var(--champagne);
@@ -1487,7 +1492,6 @@ nav {
 @media (max-width: 700px) { .statement { margin-top: 78px; padding-top: 64px; } }
 
 /* ============ METHOD — three plates, one bench ============ */
-.method-section { border-top: 0; }
 .method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--hair); border: 1px solid var(--hair); }
 .method-card {
   background: var(--noir); padding: 52px 42px 56px; position: relative;
@@ -1495,16 +1499,15 @@ nav {
   transition: background 0.5s var(--ease);
 }
 .method-card:hover { background: #141414; }
+.method-card.emphasis { background: var(--noir-2); }
+.method-card.emphasis .mc-mark { color: var(--champagne-hi); }
 .method-card .mc-mark {
   font-family: var(--display); font-style: italic; font-size: 24px; color: var(--champagne);
   letter-spacing: 0.02em; padding-bottom: 18px; margin-bottom: 28px;
   border-bottom: 1px solid var(--hair);
 }
-.method-card.emphasis { background: #151515; }
 .method-card h3 { margin-bottom: 16px; color: var(--ivory); font-size: clamp(21px, 2.2vw, 26px); }
 .method-card p { font-size: 15px; color: var(--ivory-dim); line-height: 1.85; font-weight: 400; }
-.method-card.emphasis { background: var(--noir-2); }
-.method-card.emphasis .mc-mark { color: var(--champagne-hi); }
 @media (max-width: 900px) {
   .method-grid { grid-template-columns: 1fr; }
   .method-card { padding: 40px 30px; }
@@ -1563,7 +1566,7 @@ nav {
 }
 .price-row .pr-name {
   font-family: var(--display); font-size: clamp(22px, 2.2vw, 27px); font-weight: 400;
-  color: var(--ivory); line-height: 1.14; margin-bottom: 6px;
+  color: var(--ivory); line-height: 1.14; margin-bottom: 6px; min-height: 2.3em;
 }
 .price-row .pr-name .feat {
   display: inline-block; font-style: normal; font-family: var(--sans);
@@ -1571,7 +1574,6 @@ nav {
   color: var(--noir); background: var(--champagne);
   padding: 4px 10px; vertical-align: middle; margin-left: 10px; border-radius: 2px;
 }
-.price-row .pr-name { min-height: 2.3em; }
 .price-row .pr-desc { min-height: 42px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ivory-dim); margin-bottom: 28px; font-weight: 500; }
 .price-row .pr-price { margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--hair); }
 .price-row .pr-price .from { display: block; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ivory-dim); margin-bottom: 8px; font-weight: 500; }
@@ -1600,7 +1602,6 @@ nav {
 }
 @media (max-width: 640px) {
   .price-list { grid-template-columns: 1fr; }
-  .price-row:hover { transform: none; }
 }
 
 /* ============ FAQ — contained, not just another list ============ */
@@ -1617,7 +1618,6 @@ nav {
   list-style: none; cursor: pointer;
   display: grid; grid-template-columns: 46px 1fr 28px; gap: 26px; align-items: baseline;
   padding: 30px 26px 30px 0; -webkit-tap-highlight-color: transparent;
-  transition: padding 0.4s var(--ease);
 }
 .faq-item[open] summary { padding-bottom: 20px; }
 .faq-item summary::-webkit-details-marker { display: none; }
@@ -1689,10 +1689,11 @@ label {
   transition: color 0.4s var(--ease); position: relative; padding-left: 15px;
 }
 label::before {
-  content: ""; position: absolute; left: 0; top: 0.52em; width: 7px; height: 1px;
-  background: var(--champagne-soft); transition: width 0.4s var(--ease), background 0.4s var(--ease);
+  content: ""; position: absolute; left: 0; top: 0.52em; width: 11px; height: 1px;
+  background: var(--champagne-soft); transform: scaleX(0.636); transform-origin: left center;
+  transition: transform 0.4s var(--ease), background 0.4s var(--ease);
 }
-.form-group:focus-within label::before { width: 11px; background: var(--champagne); }
+.form-group:focus-within label::before { transform: scaleX(1); background: var(--champagne); }
 .form-group:focus-within label { color: var(--champagne); }
 
 input, textarea, select {
@@ -1704,7 +1705,6 @@ input, textarea, select {
   background-repeat: repeat-x; background-position: 0 100%; background-size: 430px 5px;
   transition: filter 0.4s var(--ease);
 }
-input:focus, textarea:focus, select:focus { filter: none; }
 .form-group:focus-within input, .form-group:focus-within textarea, .form-group:focus-within select {
   filter: brightness(1.9) sepia(0.5) saturate(2.4) hue-rotate(-8deg);
 }
@@ -1755,8 +1755,8 @@ select option { background: var(--noir-2); color: var(--ivory); }
 .form-submit:disabled { opacity: 0.7; cursor: wait; }
 
 .success-message {
-  display: none; padding: 22px 26px; margin-bottom: 30px; border: 1px solid var(--champagne-soft);
-  border-left: 3px solid var(--champagne); background: var(--noir-3); color: var(--ivory); font-size: 15px; font-weight: 300;
+  display: none; padding: 22px 26px; margin-bottom: 30px; border: 1px solid var(--champagne);
+  background: var(--noir-3); color: var(--ivory); font-size: 15px; font-weight: 300;
 }
 .success-message.show { display: block; }
 .success-message strong { font-family: var(--display); font-weight: 500; font-style: italic; }
@@ -1788,7 +1788,7 @@ footer { background: var(--noir); color: var(--ivory); padding: 0 0 46px; border
   .footer-content { grid-template-columns: 1fr; gap: 40px; }
   .footer-section { padding: 0; border-left: 0; }
 }
-.footer-section h4 {
+.footer-section h3 {
   font-family: var(--sans); font-size: 10px; font-weight: 600; color: var(--champagne);
   text-transform: uppercase; letter-spacing: 0.26em;
   margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1px solid var(--hair);
@@ -1916,10 +1916,11 @@ body.loading .cover-deck{animation-play-state:running!important}</style></noscri
 
   if (enterBtn) enterBtn.addEventListener('click', dismiss);
 
-  if (clientBtn && clientNote) {
-    var noteTimer;
+  if (clientBtn) {
     clientBtn.addEventListener('click', function () {
-      window.location.href='client-suite.html';
+      // the note is the only feedback between the click and the page swap
+      if (clientNote) clientNote.classList.add('show');
+      window.location.href = 'client-suite.html';
     });
   }
 
@@ -1937,7 +1938,7 @@ body.loading .cover-deck{animation-play-state:running!important}</style></noscri
   function setProgress(p) {
     p = Math.max(shown, Math.min(1, p));
     shown = p;
-    if (bar) bar.style.width = (p * 100).toFixed(1) + '%';
+    if (bar) bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
     if (pct) pct.textContent = String(Math.round(p * 100));
   }
 
@@ -2639,12 +2640,12 @@ body.loading .cover-deck{animation-play-state:running!important}</style></noscri
   <div class="container">
     <div class="footer-content">
       <div class="footer-section">
-        <h4>North Point Creative</h4>
+        <h3>North Point Creative</h3>
         <p>Web design and development for businesses that mean to be taken seriously.</p>
         <p>Based in Liverpool. Working across the UK.</p>
       </div>
       <div class="footer-section">
-        <h4>Index</h4>
+        <h3>Index</h3>
         <a href="#work">Work</a>
         <a href="#testimonials">Reviews</a>
         <a href="#about">Studio</a>
@@ -2654,7 +2655,7 @@ body.loading .cover-deck{animation-play-state:running!important}</style></noscri
         <a href="#faq">FAQ</a>
       </div>
       <div class="footer-section">
-        <h4>Enquiries</h4>
+        <h3>Enquiries</h3>
         <a href="mailto:hello@northpointcreative.co.uk">hello@northpointcreative.co.uk</a>
         <p>Reply within 24 hours</p>
       </div>
@@ -2928,7 +2929,7 @@ function handleSubmit(event) {
     var h = document.documentElement;
     var scrolled = h.scrollTop;
     var max = h.scrollHeight - h.clientHeight;
-    bar.style.width = (max > 0 ? Math.min(100, (scrolled / max) * 100) : 0) + '%';
+    bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, scrolled / max) : 0).toFixed(4) + ')';
 
     // Show bar on scroll, then fade it out after 1.5s of no scrolling
     bar.style.opacity = '1';
@@ -2942,24 +2943,9 @@ function handleSubmit(event) {
   update();
 })();
 
-/* ===== FAQ toggle icon: smooth rotation on open/close ===== */
-(function () {
-  document.querySelectorAll('.faq-item summary').forEach(function (summary) {
-    summary.addEventListener('click', function () {
-      var faqItem = summary.parentElement;
-      var toggleIcon = faqItem.querySelector('.faq-toggle');
-      if (!toggleIcon) return;
-
-      if (faqItem.hasAttribute('open')) {
-        toggleIcon.style.transform = 'rotate(90deg)';
-        toggleIcon.style.opacity = '0';
-      } else {
-        toggleIcon.style.transform = 'rotate(0)';
-        toggleIcon.style.opacity = '1';
-      }
-    });
-  });
-})();
+/* The FAQ toggle is driven entirely by `.faq-item[open] .faq-toggle::after` in
+   the stylesheet: the vertical bar rotates away and the horizontal one stays,
+   so a plus becomes a minus. It needs no script. */
 
 /* ===== Buttons: they press into the page like a stamp and come back up ===== */
 (function () {
