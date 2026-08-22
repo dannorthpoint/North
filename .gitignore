@@ -1,0 +1,16 @@
+# Archives and uploads — the site source lives in the repo, not in zips
+*.zip
+*.tar
+*.tar.gz
+
+# Generated / one-off audit output
+*.gz
+pagespeed-*.json
+home-desktop.png
+home-mobile.png
+structure_extract.txt
+
+# OS and editor cruft
+.DS_Store
+Thumbs.db
+*.swp
