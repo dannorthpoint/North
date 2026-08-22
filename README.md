@@ -15,18 +15,27 @@ static site. There is no build step: the repository root is the deployed site ro
 | `docs/` | Audit notes and enhancement write-ups (not part of the site) |
 | `tools/` | One-off audit scripts (contrast check, PageSpeed fetch) |
 
+## The compass mark
+
+The mark is drawn once as an SVG `<symbol id="np-mark">` at the top of `<body>` and placed
+with `<use href="#np-mark">` wherever it appears. It inherits `currentColor` for its light
+facets, so the same markup reads correctly on paper and on noir. It replaced two PNGs that
+were referenced but never existed in the repository.
+
 ## Known gaps
 
-`index.html` references three assets that are not in this repository:
+`index.html` references one asset that is not in this repository: `video_btg_lee.mp4`, the
+Beyond The Gate testimonial film. If the file is missing the player stands itself down on
+error and the section reads as a pull quote, so nothing visibly breaks — but the film does
+not play. Add the file and the player returns on its own.
 
-- `north-point-mark.png` and `north-point-mark-light.png` — the compass mark, used in the
-  masthead, cover, and footer. Both `<img>` tags hide themselves via `onerror`, so a missing
-  file degrades quietly, but the mark never appears.
-- `video_btg_lee.mp4` — the Beyond The Gate testimonial video. The poster image still shows;
-  playback fails.
+## The intro
 
-If these files exist on the live host, add them here so the repository is a complete copy of
-the deployment. If they do not, either supply them or remove the references.
+The loader plays once per session, lifts on its own when the page is ready, and offers an
+Enter button from the first second. It never appears for `prefers-reduced-motion`, never
+appears on a second page view in the same session, and is `display: none` unless a script
+has opted into it — so scripting that is off, blocked, or broken leaves the page uncovered
+rather than sealed behind a plate.
 
 ## Roadmap
 
